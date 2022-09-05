@@ -1,0 +1,12 @@
+[package]
+name = "karty_bridge_bot_random"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bridge_core = {path="../bridge_core"}
+rand = "0.8.5"
+fern = "0.6.1"
+log = "0.4.17"
