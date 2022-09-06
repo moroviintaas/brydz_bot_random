@@ -1,54 +1,42 @@
 use std::sync::mpsc::{Receiver, Sender};
 use bridge_core::error::BridgeErrorStd;
 use bridge_core::player::situation::Situation;
-use bridge_core::protocol::{ClientMessage, DealNotify, ServerMessage};
-use bridge_core::protocol::ClientMessage::Quit;
-use bridge_core::protocol::DealAction::ShowHand;
+use bridge_core::protocol::{ClientDealMessage, DealNotify, ServerDealMessage};
 use crate::Bot;
-use log::info;
-use bridge_core::error::FlowError::ServerDead;
+use bridge_core::protocol::ClientControlMessage::{IamReady, Quit};
+use bridge_core::protocol::ClientDealInformation::ShowHand;
 
 pub struct DummyOverChannel{
-    sender: Sender<ClientMessage>,
-    receiver: Receiver<ServerMessage>,
+    sender: Sender<ClientDealMessage>,
+    receiver: Receiver<ServerDealMessage>,
     situation: Situation,
 }
 
 impl DummyOverChannel{
-    pub fn new(sender: Sender<ClientMessage>, receiver: Receiver<ServerMessage>, situation: Situation) -> Self{
+    pub fn new(sender: Sender<ClientDealMessage>, receiver: Receiver<ServerDealMessage>, situation: Situation) -> Self{
         Self{sender, receiver, situation}
     }
 
 }
 
+
 impl Bot for DummyOverChannel{
     fn run(&mut self) -> Result<(), BridgeErrorStd> {
-        self.sender.send(ClientMessage::Ready)?;
+        self.sender.send(IamReady.into())?;
         loop{
             match self.receiver.recv()?{
-                ServerMessage::Deal(notify) => match notify{
+                ServerDealMessage::Notify(notify) => match notify{
                     DealNotify::YourMove => {
-                        self.sender.send(ClientMessage::Dealing(ShowHand(self.situation.hand().clone())))?
-                    }
+                        self.sender.send(ShowHand(self.situation.hand().clone()).into())?
+                    },
                     DealNotify::DealClosed => {
-                        self.sender.send(Quit)?;
+                        self.sender.send(Quit.into()).unwrap_or(());
                         return Ok(())
-                    }
+                    },
                     _ => {}
                 }
-                ServerMessage::Bidding(_) => {}
-                ServerMessage::PlayerLeft(_) => {}
-                ServerMessage::DealInfo(_) => {}
-                ServerMessage::BiddingInfo(_) => {}
-                ServerMessage::GameOver => {
-                    return Ok(())
-                }
-                ServerMessage::Error(_) => {}
-                ServerMessage::ServerNotReady => {}
-                ServerMessage::ServerStopping => {
-                    info!("Server is stopping. Exiting. Dummy signing out");
-                    return Err(ServerDead.into());
-                },
+                ServerDealMessage::Info(_) => {}
+                ServerDealMessage::Control(_) => {}
             }
         }
     }

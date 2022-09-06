@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bridge_core = {path="../bridge_core"}
+bridge_core = {path="../bridge_core", features = ["world"]}
 rand = "0.8.5"
 fern = "0.6.1"
 log = "0.4.17"
