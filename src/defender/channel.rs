@@ -1,16 +1,16 @@
 use std::sync::mpsc::{Receiver, Sender};
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
-use bridge_core::deal::DealMaintainer;
-use bridge_core::error::{ BridgeErrorStd,  Mismatch};
-use bridge_core::error::HandError::EmptyHand;
-use bridge_core::player::side::Side;
-use bridge_core::player::situation::Situation;
-use bridge_core::protocol::{ClientDealMessage, DealAction,  ServerDealMessage};
-use bridge_core::protocol::DealAction::{PlayCard};
-use bridge_core::error::DealError::DealFull;
-use bridge_core::error::TrickError::ViolatedOrder;
-use bridge_core::world::agent::{Agent, AwareAgent, CommunicatingAgent};
+use brydz_core::deal::DealMaintainer;
+use brydz_core::error::{ BridgeErrorStd,  Mismatch};
+use brydz_core::error::HandError::EmptyHand;
+use brydz_core::player::side::Side;
+use brydz_core::player::situation::Situation;
+use brydz_core::protocol::{ClientDealMessage, DealAction,  ServerDealMessage};
+use brydz_core::protocol::DealAction::{PlayCard};
+use brydz_core::error::DealError::DealFull;
+use brydz_core::error::TrickError::ViolatedOrder;
+use brydz_core::world::agent::{Agent, AwareAgent, CommunicatingAgent};
 
 pub struct DefenderOverChannel{
     sender: Sender<ClientDealMessage>,
