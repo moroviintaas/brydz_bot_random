@@ -1,43 +1,31 @@
-
-use std::sync::mpsc::{Receiver,  Sender};
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
-use brydz_core::deal::{DealMaintainer};
-use brydz_core::error::{BridgeErrorStd,  Mismatch};
-use brydz_core::error::HandError::EmptyHand;
-use brydz_core::player::side::Side;
-use brydz_core::player::situation::Situation;
-use brydz_core::protocol::{ClientDealMessage,  DealAction,  ServerDealMessage};
-use brydz_core::protocol::DealAction::{PlayCard};
+use brydz_core::deal::DealMaintainer;
+use brydz_core::distribution::hand::BridgeHand;
+use brydz_core::error::{BridgeErrorStd, Mismatch};
 use brydz_core::error::DealError::DealFull;
+use brydz_core::error::HandError::EmptyHand;
 use brydz_core::error::TrickError::ViolatedOrder;
-use brydz_core::world::agent::{Agent, AwareAgent, CommunicatingAgent};
+use brydz_core::player::situation::Situation;
+use brydz_core::protocol::{ClientDealMessage, DealAction, ServerDealMessage};
+use brydz_core::protocol::DealAction::PlayCard;
+use brydz_core::world::agent::{Agent,  AwareAgent, CommunicatingAgent};
+use brydz_core::world::comm::{CommunicationEnd};
 
-pub struct DeclarerOverChannel{
-    sender: Sender<ClientDealMessage>,
-    receiver: Receiver<ServerDealMessage>,
+pub struct DeclarerBot<Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorStd>>{
     situation: Situation,
+    comm: Comm,
 }
 
-impl DeclarerOverChannel{
-    pub fn new(sender: Sender<ClientDealMessage>, receiver: Receiver<ServerDealMessage>, situation: Situation) -> Self{
-        Self{sender, receiver, situation}
+impl<Comm> DeclarerBot<Comm>
+where Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
+    pub fn new(comm: Comm, situation: Situation) -> Self{
+        Self{comm, situation}
     }
-
-    pub fn side(&self) -> Side{
-        self.situation.side()
-    }
-    pub fn partner_side(&self) -> Side{
-        self.situation.side().partner()
-    }
-    pub fn current_side(&self) -> Option<Side>{
-        self.situation.current_side()
-    }
-
-
 }
 
-impl Agent<DealAction> for DeclarerOverChannel {
+impl<Comm> Agent<DealAction> for DeclarerBot<Comm>
+where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
     fn select_action(&self) -> Result<DealAction, BridgeErrorStd> {
         let mut rng = thread_rng();
         match self.situation.current_side(){
@@ -64,11 +52,13 @@ impl Agent<DealAction> for DeclarerOverChannel {
                 }
 
             }
-            Some(bad) => Err(ViolatedOrder(Mismatch{expected: bad, found: self.side()}).into())
+            Some(bad) => Err(ViolatedOrder(Mismatch{expected: bad, found: self.situation.side()}).into())
         }
     }
 }
-impl AwareAgent<Situation> for DeclarerOverChannel{
+
+impl<Comm> AwareAgent<Situation> for DeclarerBot<Comm>
+where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage,  BridgeErrorStd>{
     fn env(&self) -> &Situation {
         &self.situation
     }
@@ -76,14 +66,24 @@ impl AwareAgent<Situation> for DeclarerOverChannel{
     fn env_mut(&mut self) -> &mut Situation {
         &mut self.situation
     }
+
+    fn set_dummy_hand(&mut self, dummy_hand: BridgeHand) {
+        self.env_mut().set_dummy(dummy_hand)
+    }
 }
 
-impl CommunicatingAgent<ServerDealMessage, ClientDealMessage, DealAction, BridgeErrorStd> for DeclarerOverChannel{
+impl<Comm> CommunicatingAgent<ServerDealMessage, ClientDealMessage,  DealAction, BridgeErrorStd> for DeclarerBot<Comm>
+    where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd> {
     fn send(&self, message: ClientDealMessage) -> Result<(), BridgeErrorStd> {
-        self.sender.send(message).map_err(|e| e.into())
+        self.comm.send(message)
     }
 
-    fn recv(&self) -> Result<ServerDealMessage, BridgeErrorStd> {
-        self.receiver.recv().map_err(|e| e.into())
+    fn recv(&mut self) -> Result<ServerDealMessage, BridgeErrorStd> {
+        self.comm.recv()
     }
 }
+
+
+
+
+
