@@ -74,7 +74,7 @@ where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage,  BridgeErrorS
 
 impl<Comm> CommunicatingAgent<ServerDealMessage, ClientDealMessage,  DealAction, BridgeErrorStd> for DeclarerBot<Comm>
     where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd> {
-    fn send(&self, message: ClientDealMessage) -> Result<(), BridgeErrorStd> {
+    fn send(&mut self, message: ClientDealMessage) -> Result<(), BridgeErrorStd> {
         self.comm.send(message)
     }
 
