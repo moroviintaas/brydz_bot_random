@@ -1,10 +1,10 @@
 use std::sync::mpsc::{Receiver, Sender};
-use brydz_core::error::BridgeErrorStd;
 use brydz_core::player::situation::Situation;
-use brydz_core::protocol::{ClientDealMessage, DealNotify, ServerDealMessage};
+use brydz_framework::error::BridgeErrorStd;
+use brydz_framework::protocol::{ClientDealMessage, DealNotify, ServerDealMessage};
 use crate::Bot;
-use brydz_core::protocol::ClientControlMessage::{IamReady, Quit};
-use brydz_core::protocol::ClientDealInformation::ShowHand;
+use brydz_framework::protocol::ClientControlMessage::{IamReady, Quit};
+use brydz_framework::protocol::ClientDealInformation::ShowHand;
 
 pub struct DummyOverChannel{
     sender: Sender<ClientDealMessage>,

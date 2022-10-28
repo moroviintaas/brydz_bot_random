@@ -2,15 +2,16 @@ use rand::seq::IteratorRandom;
 use rand::thread_rng;
 use brydz_core::deal::DealMaintainer;
 use brydz_core::distribution::hand::BridgeHand;
-use brydz_core::error::{BridgeErrorStd, Mismatch};
+use brydz_core::error::{BridgeCoreErrorStd, Mismatch};
 use brydz_core::error::DealError::DealFull;
 use brydz_core::error::HandError::EmptyHand;
 use brydz_core::error::TrickError::ViolatedOrder;
 use brydz_core::player::situation::Situation;
-use brydz_core::protocol::{ClientDealMessage, DealAction, ServerDealMessage};
-use brydz_core::protocol::DealAction::PlayCard;
-use brydz_core::world::agent::{Agent, AwareAgent, CommunicatingAgent};
-use brydz_core::world::comm::{CommunicationEnd};
+use brydz_framework::error::BridgeErrorStd;
+use brydz_framework::protocol::{ClientDealMessage, DealAction, ServerDealMessage};
+use brydz_framework::protocol::DealAction::PlayCard;
+use brydz_framework::world::agent::{Agent, AwareAgent, CommunicatingAgent};
+use brydz_framework::world::comm::{CommunicationEnd};
 
 pub struct DefenderBot<Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorStd>>{
     situation: Situation,
@@ -26,16 +27,16 @@ where Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorS
 
 impl<Comm> Agent<DealAction> for DefenderBot<Comm>
 where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
-    fn select_action(&self) -> Result<DealAction, BridgeErrorStd> {
+    fn select_action(&self) -> Result<DealAction, BridgeCoreErrorStd> {
         let mut rng = thread_rng();
         match self.situation.current_side(){
             None => Err(DealFull.into()),
             Some(my) if my == self.situation.side()  => {
                 match self.situation.deal().current_trick().called_suit() {
                     None => self.situation.cards_hand().iter().choose(&mut rng)
-                        .map_or(Err(BridgeErrorStd::Hand(EmptyHand)), |cr|  Ok(PlayCard(cr.to_owned()))),
+                        .map_or(Err(BridgeCoreErrorStd::Hand(EmptyHand)), |cr|  Ok(PlayCard(cr.to_owned()))),
                     Some(s) => match self.situation.hand().cards_in_suit(s).iter().choose(&mut rng){
-                        None => self.situation.cards_hand().iter().choose(&mut rng).map_or(Err(BridgeErrorStd::Hand(EmptyHand)), |c| Ok(PlayCard(c.to_owned()))),
+                        None => self.situation.cards_hand().iter().choose(&mut rng).map_or(Err(BridgeCoreErrorStd::Hand(EmptyHand)), |c| Ok(PlayCard(c.to_owned()))),
                         Some(c) => Ok(PlayCard(c.to_owned()))
                     }
                 }
@@ -47,7 +48,7 @@ where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorSt
 }
 
 impl<Comm> AwareAgent<Situation> for DefenderBot<Comm>
-where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage,  BridgeErrorStd>{
+where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
     fn env(&self) -> &Situation {
         &self.situation
     }

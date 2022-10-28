@@ -1,5 +1,4 @@
-
-use brydz_core::error::{BridgeErrorStd};
+use brydz_framework::error::BridgeErrorStd;
 
 pub mod declarer;
 pub mod defender;
