@@ -1,7 +1,7 @@
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
 use brydz_core::contract::DealMaintainer;
-use brydz_core::distribution::hand::BridgeHand;
+use brydz_core::deal::hand::HandVector;
 use brydz_core::error::{BridgeCoreErrorStd, Mismatch};
 use brydz_core::error::DealError::DealFull;
 use brydz_core::error::HandError::EmptyHand;
@@ -68,7 +68,7 @@ where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorSt
         &mut self.situation
     }
 
-    fn set_dummy_hand(&mut self, dummy_hand: BridgeHand) {
+    fn set_dummy_hand(&mut self, dummy_hand: HandVector) {
         self.env_mut().set_dummy(dummy_hand)
     }
 }
