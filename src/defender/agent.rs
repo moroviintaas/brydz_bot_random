@@ -10,7 +10,7 @@ use brydz_core::player::situation::Situation;
 use brydz_framework::error::BridgeErrorStd;
 use brydz_framework::protocol::{ClientDealMessage, DealAction, ServerDealMessage};
 use brydz_framework::protocol::DealAction::PlayCard;
-use brydz_framework::world::agent::{Agent, AwareAgent, CommunicatingAgent};
+use brydz_framework::world::agent::{AgentOld, AwareAgent, CommunicatingAgent};
 use brydz_framework::world::comm::{CommunicationEnd};
 
 pub struct DefenderBot<Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorStd>>{
@@ -25,7 +25,7 @@ where Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorS
     }
 }
 
-impl<Comm> Agent<DealAction> for DefenderBot<Comm>
+impl<Comm> AgentOld<DealAction> for DefenderBot<Comm>
 where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
     fn select_action(&self) -> Result<DealAction, BridgeCoreErrorStd> {
         let mut rng = thread_rng();
