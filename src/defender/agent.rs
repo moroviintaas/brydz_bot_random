@@ -1,6 +1,6 @@
 use rand::seq::IteratorRandom;
 use rand::thread_rng;
-use brydz_core::contract::DealMaintainer;
+use brydz_core::contract::ContractMaintainer;
 use brydz_core::deal::hand::HandVector;
 use brydz_core::error::{BridgeCoreErrorStd, Mismatch};
 use brydz_core::error::DealError::DealFull;
