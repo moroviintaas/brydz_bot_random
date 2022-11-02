@@ -10,7 +10,7 @@ use brydz_core::player::situation::Situation;
 use brydz_framework::error::BridgeErrorStd;
 use brydz_framework::protocol::{ClientDealMessage, DealAction, ServerDealMessage};
 use brydz_framework::protocol::DealAction::PlayCard;
-use brydz_framework::world::agent::{AgentOld, AwareAgent, CommunicatingAgent};
+use brydz_framework::world::agent::{AgentOld, AwareAgent_Old, CommunicatingAgent_Old};
 use brydz_framework::world::comm::{CommunicationEnd};
 
 pub struct DefenderBot<Comm: CommunicationEnd< ClientDealMessage, ServerDealMessage, BridgeErrorStd>>{
@@ -47,7 +47,7 @@ where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorSt
     }
 }
 
-impl<Comm> AwareAgent<Situation> for DefenderBot<Comm>
+impl<Comm> AwareAgent_Old<Situation> for DefenderBot<Comm>
 where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd>{
     fn env(&self) -> &Situation {
         &self.situation
@@ -62,7 +62,7 @@ where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorSt
     }
 }
 
-impl<Comm> CommunicatingAgent<ServerDealMessage, ClientDealMessage,  DealAction, BridgeErrorStd> for DefenderBot<Comm>
+impl<Comm> CommunicatingAgent_Old<ServerDealMessage, ClientDealMessage,  DealAction, BridgeErrorStd> for DefenderBot<Comm>
     where Comm: CommunicationEnd<ClientDealMessage, ServerDealMessage, BridgeErrorStd> {
     fn send(&mut self, message: ClientDealMessage) -> Result<(), BridgeErrorStd> {
         self.comm.send(message)
